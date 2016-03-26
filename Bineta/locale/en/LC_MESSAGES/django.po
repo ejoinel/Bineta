@@ -1,0 +1,98 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2016-01-02 23:52+0100\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: Bineta/models.py:155
+msgid "{} correction du sujet {}"
+msgstr ""
+
+#: Bineta/settings.py:154
+msgid "French"
+msgstr ""
+
+#: Bineta/settings.py:154
+msgid "English"
+msgstr ""
+
+#: Bineta/templates/account/password_reset_email.html:2
+#, python-format
+msgid ""
+"You're receiving this email because you requested a password reset for your "
+"user account at %(site_name)s."
+msgstr ""
+
+#: Bineta/templates/account/password_reset_email.html:4
+msgid "Please go to the following page and choose a new password:"
+msgstr ""
+
+#: Bineta/templates/account/password_reset_email.html:5
+msgid "Your username, in case you've forgotten: "
+msgstr ""
+
+#: Bineta/templates/account/password_reset_email.html:6
+msgid "Your new password: "
+msgstr ""
+
+#: Bineta/templates/account/password_reset_email.html:8
+msgid "Thanks for using our site!"
+msgstr ""
+
+#: Bineta/templates/account/password_reset_email.html:10
+#, python-format
+msgid "The %(site_name)s team"
+msgstr ""
+
+#: Bineta/templates/login.html:12
+msgid "Connectez-vous"
+msgstr ""
+
+#: Bineta/templates/login.html:21
+msgid "Mot de passe oublié ?"
+msgstr ""
+
+#: Bineta/templates/login.html:25 Bineta/templates/register.html:24
+msgid "L'inscrition vous permet:"
+msgstr ""
+
+#: Bineta/templates/login.html:27 Bineta/templates/register.html:26
+msgid "Consultez tous les examens/corrigés"
+msgstr ""
+
+#: Bineta/templates/login.html:28 Bineta/templates/register.html:27
+msgid "Proposez des examens/corrigés"
+msgstr ""
+
+#: Bineta/templates/login.html:29 Bineta/templates/register.html:28
+msgid "Adhérez à la newsletter"
+msgstr ""
+
+#: Bineta/templates/login.html:30 Bineta/templates/register.html:29
+msgid "Discutez avec d'autres membres"
+msgstr ""
+
+#: Bineta/templates/login.html:31 Bineta/templates/register.html:30
+msgid "Et bien plus que ça ..."
+msgstr ""
+
+#: Bineta/templates/login.html:33
+msgid "Créer un compte"
+msgstr ""
+
+#: Bineta/templates/register.html:12
+msgid "Créer un compte et rejoignez la communauté <b>Mbacho</b>"
+msgstr ""

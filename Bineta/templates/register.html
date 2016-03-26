@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register{% endblock %} 
+{% block bodyId %}RegisterPage{% endblock %}
+{% block body_block %}
+
+<div id="login-overlay" class="modal-dialog">
+    <div class="row">
+        <div class="panel panel-info" >
+            <div class="panel-heading">
+                <div class="panel-title">S'inscrire</div>
+            </div>
+            <div class="panel-body" >
+                <div class="col-sm-6">
+	                <div class="well">
+	                    <form id="UserForm" method="POST">
+                            {% crispy form %}
+	                    </form>
+	                </div>
+	            </div>
+	            <div class="col-sm-6">
+	                <p class="lead">{% trans "L'inscrition vous permet:" %}</p>
+	                <ul class="list-unstyled" style="line-height: 2">
+	                    <li><span class="fa fa-check-square-o text-success"></span>{% trans "Consultez tous les examens/corrigés" %}</li>
+	                    <li><span class="fa fa-check-square-o text-success"></span>{% trans "Proposez des examens/corrigés" %}</li>
+	                    <li><span class="fa fa-check-square-o text-success"></span>{% trans "Adhérez à la newsletter" %}</li>
+	                    <li><span class="fa fa-check-square-o text-success"></span>{% trans "Discutez avec d'autres membres" %}</li>
+	                    <li><span class="fa fa-check-square-o text-success"></span>{% trans "Et bien plus que ça ..." %}</li>
+	                </ul>
+	            </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
