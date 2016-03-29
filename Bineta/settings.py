@@ -103,7 +103,7 @@ THIRD_PARTY_APPS = (
     'passwords',
     'multiupload',
     'bootstrap_pagination',
-    'rest_framework'
+    'tastypie'
 )
 
 
