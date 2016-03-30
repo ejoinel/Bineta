@@ -20,6 +20,8 @@ from django.views.generic import ListView
 from django.core.paginator import Paginator
 from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
+from Bineta.serializers import UserSerializer
+from rest_framework import viewsets
 
 import FORM_PROPERTIES
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
@@ -31,6 +33,13 @@ MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
                  message_constants.SUCCESS: 'success',
                  message_constants.WARNING: 'warning',
                  message_constants.ERROR: 'danger', }
+
+
+# ViewSets define the view behavior.
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
 
 
 def get_logged_user_from_request( request ):
