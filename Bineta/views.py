@@ -22,11 +22,15 @@ from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
 from Bineta.serializers import UserSerializer
 from rest_framework import viewsets
+from rest_framework import generics
 
 import FORM_PROPERTIES
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
 from Bineta.models import User, DocumentFile, Exam
 from Bineta.settings import DEFAULT_FROM_EMAIL
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.http import HttpResponse
 
 MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
                  message_constants.INFO: 'info',
@@ -36,9 +40,31 @@ MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
 
 
 # ViewSets define the view behavior.
-class UserViewSet(viewsets.ModelViewSet):
+class UserListAPIView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+
+@api_view(['GET'])
+def user_get_all(request):
+    if request.method == 'GET':
+        posts = User.objects.all()
+        serializer = UserSerializer(posts, many=True)
+        return UserSerializer(serializer.data)
+
+
+
+@api_view(['GET'])
+def user_get_from_id(request, pk):
+    try:
+        post = User.objects.get(pk=pk)
+    except User.DoesNotExist:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = UserSerializer(post)
+        return Response(serializer.data)
 
 
 
