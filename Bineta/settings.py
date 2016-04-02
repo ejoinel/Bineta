@@ -104,7 +104,7 @@ THIRD_PARTY_APPS = (
     'multiupload',
     'bootstrap_pagination',
     'rest_framework',
-    'rest_framework.authtoken',
+    'knox',
 )
 
 
@@ -116,13 +116,11 @@ LOCAL_APPS = (
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-    )
+REST_KNOX = {
+  'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
+  'AUTH_TOKEN_CHARACTER_LENGTH': 64,
+  'TOKEN_TTL': 10,
+  'USER_SERIALIZER': 'knox.serializers.UserSerializer',
 }
 
 PASSWORD_HASHERS = (

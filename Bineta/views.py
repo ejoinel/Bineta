@@ -23,6 +23,10 @@ from django.core.paginator import PageNotAnInteger
 
 import FORM_PROPERTIES
 from rest_framework import viewsets
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from knox.auth import TokenAuthentication
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
 from Bineta.models import User, DocumentFile, Exam
 from Bineta.settings import DEFAULT_FROM_EMAIL
@@ -36,7 +40,10 @@ MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
 
 
 
-class ProductViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ModelViewSet):
+
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
 
     queryset = User.objects.all()
     serializer_class = UserSerializer

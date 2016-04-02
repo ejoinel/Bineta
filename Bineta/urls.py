@@ -8,10 +8,10 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from Bineta import settings
 from rest_framework.authtoken import views
 from rest_framework import routers
-from Bineta.views import login, home, register, createexam, reset_password, ExamListView, search_exam, ProductViewSet
+from Bineta.views import login, home, register, createexam, reset_password, ExamListView, search_exam, UserViewSet
 
 router = routers.DefaultRouter()
-router.register(r'users', ProductViewSet)
+router.register(r'users', UserViewSet)
 
 admin.autodiscover()
 
@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'^account/reset_password', reset_password, name="reset_password"),
     url(r'^search$', search_exam),
     url(r'^api/', include(router.urls)),
-    url(r'^api-token-auth/', views.obtain_auth_token),
+    url(r'api/auth/', include('knox.urls'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
