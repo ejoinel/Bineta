@@ -103,7 +103,8 @@ THIRD_PARTY_APPS = (
     'passwords',
     'multiupload',
     'bootstrap_pagination',
-    'tastypie'
+    'rest_framework',
+    'rest_framework.authtoken',
 )
 
 
@@ -114,6 +115,15 @@ LOCAL_APPS = (
 )
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    )
+}
 
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',

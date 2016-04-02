@@ -4,16 +4,16 @@ from django.conf.urls import url, include
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
-from Bineta.api import UserResource, ExamResource
 
 from Bineta import settings
-from tastypie.api import Api
-from Bineta.views import login, home, register, createexam, reset_password, ExamListView, search_exam
+from rest_framework.authtoken import views
+from rest_framework import routers
+from Bineta.views import login, home, register, createexam, reset_password, ExamListView, search_exam, ProductViewSet
+
+router = routers.DefaultRouter()
+router.register(r'users', ProductViewSet)
 
 admin.autodiscover()
-service_api = Api( api_name="service" )
-service_api.register( UserResource() )
-service_api.register( ExamResource() )
 
 urlpatterns = [
     # Examples:
@@ -27,8 +27,9 @@ urlpatterns = [
     url(r'^exam_list$', ExamListView.as_view()),
     #url(r'^exam_detail/(?P<pk>\d+)/', views.exam_detail, name='person_detail'),
     url(r'^account/reset_password', reset_password, name="reset_password"),
-    url(r'^search$', search_exam ),
-    url(r'^api/', include(service_api.urls))
+    url(r'^search$', search_exam),
+    url(r'^api/', include(router.urls)),
+    url(r'^api-token-auth/', views.obtain_auth_token),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

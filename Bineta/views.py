@@ -22,15 +22,25 @@ from django.core.paginator import EmptyPage
 from django.core.paginator import PageNotAnInteger
 
 import FORM_PROPERTIES
+from rest_framework import viewsets
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
 from Bineta.models import User, DocumentFile, Exam
 from Bineta.settings import DEFAULT_FROM_EMAIL
+from Bineta.serializers import UserSerializer
 
 MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
                  message_constants.INFO: 'info',
                  message_constants.SUCCESS: 'success',
                  message_constants.WARNING: 'warning',
                  message_constants.ERROR: 'danger', }
+
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
 
 
 def get_logged_user_from_request( request ):
