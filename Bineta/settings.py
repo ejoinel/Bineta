@@ -104,7 +104,7 @@ THIRD_PARTY_APPS = (
     'multiupload',
     'bootstrap_pagination',
     'rest_framework',
-    'rest_framework.authtoken',
+    'tokenapi',
 )
 
 
@@ -116,14 +116,14 @@ LOCAL_APPS = (
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
-    )
-}
+
+AUTHENTICATION_BACKENDS = (
+    'tokenapi.backends.TokenBackend',
+    'django.contrib.auth.backends.ModelBackend',
+)
+
+TOKEN_TIMEOUT_DAYS = 7
+TOKEN_CHECK_ACTIVE_USER = True
 
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',

@@ -35,6 +35,20 @@ MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
                  message_constants.ERROR: 'danger', }
 
 
+from tokenapi.decorators import token_required
+from tokenapi.http import JsonResponse, JsonError
+
+@token_required
+def index(request):
+    if request.method == 'POST':
+        data = {
+            'test1': 49,
+            'test2': 'awesome',
+        }
+        return JsonResponse(data)
+    else:
+        return JsonError("Only POST is allowed")
+
 
 class ProductViewSet(viewsets.ModelViewSet):
 
