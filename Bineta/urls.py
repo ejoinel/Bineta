@@ -6,7 +6,6 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from Bineta import settings
-from rest_framework_expiring_authtoken import views
 from rest_framework import routers
 from Bineta.views import login, home, register, createexam, reset_password, ExamListView, search_exam, ProductViewSet
 
@@ -29,7 +28,7 @@ urlpatterns = [
     url(r'^account/reset_password', reset_password, name="reset_password"),
     url(r'^search$', search_exam),
     url(r'^api/', include(router.urls)),
-    url(r'^api-token-auth/', views.obtain_expiring_auth_token)
+    url(r'^rest-auth/', include('rest_auth.urls'))
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
