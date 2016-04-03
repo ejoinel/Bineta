@@ -26,11 +26,30 @@ from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPasswo
 from Bineta.models import User, DocumentFile, Exam
 from Bineta.settings import DEFAULT_FROM_EMAIL
 
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+
+from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+
 MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
                  message_constants.INFO: 'info',
                  message_constants.SUCCESS: 'success',
                  message_constants.WARNING: 'warning',
                  message_constants.ERROR: 'danger', }
+
+class RestrictedView(APIView):
+    permission_classes = (IsAuthenticated, )
+    authentication_classes = (JSONWebTokenAuthentication, )
+
+    def get(self, request):
+        data = {
+            'id': request.user.id,
+            'username': request.user.username,
+            'token': str(request.auth)
+        }
+        return Response(data)
+
 
 
 def get_logged_user_from_request( request ):
