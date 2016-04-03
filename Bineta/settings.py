@@ -105,6 +105,7 @@ THIRD_PARTY_APPS = (
     'bootstrap_pagination',
     'rest_framework',
     'rest_framework.authtoken',
+    'rest_framework_expiring_authtoken',
 )
 
 
@@ -113,6 +114,9 @@ LOCAL_APPS = (
     # My app
     'Bineta',
 )
+
+import datetime
+EXPIRING_TOKEN_LIFESPAN = datetime.timedelta(days=5)
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
