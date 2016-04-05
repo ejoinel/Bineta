@@ -6,7 +6,6 @@ from django.contrib import admin
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from Bineta import settings
-from rest_framework.authtoken import views
 from rest_framework import routers
 from Bineta.views import login, home, register, createexam, reset_password, ExamListView, search_exam, UserViewSet
 
@@ -28,7 +27,7 @@ urlpatterns = [
     #url(r'^exam_detail/(?P<pk>\d+)/', views.exam_detail, name='person_detail'),
     url(r'^account/reset_password', reset_password, name="reset_password"),
     url(r'^search$', search_exam),
-    url(r'^api/', include(router.urls)),
+    url(r'^api/v1/', include(router.urls)),
     url(r'api/auth/', include('knox.urls'))
 ]
 

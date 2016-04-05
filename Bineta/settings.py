@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/dev/ref/settings/
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
+from datetime import timedelta
 from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS as TCP
 from tempfile import mkdtemp
 
@@ -83,6 +84,15 @@ TEMPLATES = [
 
 CSRF_FAILURE_VIEW = 'Bineta.views.csrf_failure'
 
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
+    )
+}
+
 # Application definition
 
 DJANGO_APPS = (
@@ -119,7 +129,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 REST_KNOX = {
   'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
   'AUTH_TOKEN_CHARACTER_LENGTH': 64,
-  'TOKEN_TTL': 10,
+  'TOKEN_TTL': timedelta(hours=10),
   'USER_SERIALIZER': 'knox.serializers.UserSerializer',
 }
 
