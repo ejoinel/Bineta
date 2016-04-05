@@ -115,6 +115,7 @@ THIRD_PARTY_APPS = (
     'bootstrap_pagination',
     'rest_framework',
     'knox',
+    'rest_framework_docs',
 )
 
 
@@ -129,7 +130,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 REST_KNOX = {
   'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
   'AUTH_TOKEN_CHARACTER_LENGTH': 64,
-  'TOKEN_TTL': timedelta(hours=10),
+  'TOKEN_TTL': timedelta( days=2 ),
   'USER_SERIALIZER': 'knox.serializers.UserSerializer',
 }
 

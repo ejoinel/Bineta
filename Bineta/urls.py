@@ -27,6 +27,7 @@ urlpatterns = [
     #url(r'^exam_detail/(?P<pk>\d+)/', views.exam_detail, name='person_detail'),
     url(r'^account/reset_password', reset_password, name="reset_password"),
     url(r'^search$', search_exam),
+    url(r'^docs/', include('rest_framework_docs.urls')),
     url(r'^api/v1/', include(router.urls)),
     url(r'api/auth/', include('knox.urls'))
 ]
