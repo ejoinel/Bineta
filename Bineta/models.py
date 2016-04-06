@@ -2,14 +2,12 @@
 
 # import DATABASE_CONF
 import os
+import utils
 from django.db import models
 from django.utils import timezone
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-from Bineta import settings
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
 PERSON_SEX_CHOICE = ((0, 'Mr'), (1, 'Mme'), (2, 'Mlle'))
@@ -152,8 +150,6 @@ class Document( models.Model ):
 
 def upload_function( instance, filename ):
 
-    from helper import helper
-    my_helper = helper( )
     ext = filename.split( '.' )[-1]
     filename = "{}_{}.{}".format( instance.document.id, instance.temp_id, ext )
     document_path = "{}/{}/{}/{}/{}/{}"
@@ -163,7 +159,7 @@ def upload_function( instance, filename ):
                                           instance.document.matter.name, instance.document.year_exam,
                                           instance.document.id )
 
-    parsed_document_path = "{}/{}".format( my_helper.remove_accents_spaces( document_path ), filename )
+    parsed_document_path = "{}/{}".format( utils.remove_accents_spaces( document_path ), filename )
 
     return os.path.join( '{}'.format( parsed_document_path ) )
 

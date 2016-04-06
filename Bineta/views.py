@@ -1,36 +1,41 @@
 # -*- coding: utf-8 -*-
 
-import models
-from django.db.models import Q
 from datetime import datetime
+
 from django.contrib import messages
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth import login as super_login
 from django.contrib.auth import logout as super_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.hashers import make_password
 from django.contrib.messages import constants as message_constants
 from django.core.mail import send_mail
+from django.core.paginator import EmptyPage
+from django.core.paginator import PageNotAnInteger
+from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.template import RequestContext
 from django.template import loader
 from django.views.generic import ListView
-from django.core.paginator import Paginator
-from django.core.paginator import EmptyPage
-from django.core.paginator import PageNotAnInteger
+from knox.auth import TokenAuthentication
+from rest_framework import status
+from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 import FORM_PROPERTIES
-from rest_framework import viewsets
-from rest_framework.views import APIView
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from knox.auth import TokenAuthentication
+import models
+import utils
+import settings
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
 from Bineta.models import User, DocumentFile, Exam
+from Bineta.serializers import UserSerializer, PasswordResetSerializer
 from Bineta.settings import DEFAULT_FROM_EMAIL
-from Bineta.serializers import UserSerializer
+from rest_framework.decorators import api_view
 
 MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
                  message_constants.INFO: 'info',
@@ -47,6 +52,48 @@ class UserViewSet(viewsets.ModelViewSet):
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+
+class PasswordReset(APIView):
+    permission_classes = (AllowAny,)
+    serializer_class = PasswordResetSerializer
+
+    def post( self, request, format=None ):
+        serializer = self.serializer_class(data=request.DATA)
+
+        if serializer.is_valid():
+            email = serializer.data['email']
+
+            try:
+                user = get_user_model().objects.get(email=email)
+                if user.is_verified and user.is_active:
+                    subject = FORM_PROPERTIES.PASSWORD_RESET_SUBJECT.decode( 'utf8' )
+                    subject = subject.replace( "site_name", "Bineta" )
+
+                    new_password = utils.generate_code()
+                    print new_password
+                    #user.set_password( new_password )
+
+                    dict_values = { 'email': user.email, 'site_name': 'MBacho', 'user': user, 'password': new_password }
+                    email_template_name = 'account/password_reset_email.html'
+
+                    utils.send_email( to_email=user.email, from_email=settings.DEFAULT_FROM_EMAIL, context=dict_values,
+                                      subject_template_name=subject, plain_body_template_name=email_template_name )
+
+                    #user.save( )
+                    content = { 'detail': 'Password reset' }
+                    return Response( content, status=status.HTTP_200_OK )
+
+            except get_user_model().DoesNotExist:
+                pass
+
+            # Since this is AllowAny, don't give away error.
+            content = { 'detail': 'Password reset not allowed.' }
+            return Response(content, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
 
 
 
