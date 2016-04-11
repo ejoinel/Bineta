@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 from datetime import datetime
-
 from django.contrib import messages
 from django.contrib.auth import authenticate, get_user_model
 from django.contrib.auth import login as super_login
@@ -15,6 +14,7 @@ from django.core.paginator import PageNotAnInteger
 from django.core.paginator import Paginator
 from django.db.models import Q
 from django.http import HttpResponseRedirect
+from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.shortcuts import render_to_response
 from django.template import RequestContext
@@ -29,13 +29,12 @@ from rest_framework.views import APIView
 
 import FORM_PROPERTIES
 import models
-import utils
 import settings
+import utils
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
 from Bineta.models import User, DocumentFile, Exam
 from Bineta.serializers import UserSerializer, PasswordResetSerializer
 from Bineta.settings import DEFAULT_FROM_EMAIL
-from rest_framework.decorators import api_view
 
 MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
                  message_constants.INFO: 'info',
@@ -47,11 +46,22 @@ MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
 
 class UserViewSet(viewsets.ModelViewSet):
 
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
+    def list(self, request):
+        queryset = User.objects.all()
+        serializer = UserSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk=None):
+        queryset = User.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
 
 
@@ -60,28 +70,28 @@ class PasswordReset(APIView):
     serializer_class = PasswordResetSerializer
 
     def post( self, request, format=None ):
-        serializer = self.serializer_class(data=request.DATA)
+        serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
             email = serializer.data['email']
 
             try:
                 user = get_user_model().objects.get(email=email)
-                if user.is_verified and user.is_active:
+                if user and user.is_active:
                     subject = FORM_PROPERTIES.PASSWORD_RESET_SUBJECT.decode( 'utf8' )
                     subject = subject.replace( "site_name", "Bineta" )
 
                     new_password = utils.generate_code()
                     print new_password
-                    #user.set_password( new_password )
+                    user.set_password( new_password )
 
-                    dict_values = { 'email': user.email, 'site_name': 'MBacho', 'user': user, 'password': new_password }
+                    dict_values = { 'email': user.email, 'site_name': 'Bineta', 'user': user, 'password': new_password }
                     email_template_name = 'account/password_reset_email.html'
 
                     utils.send_email( to_email=user.email, from_email=settings.DEFAULT_FROM_EMAIL, context=dict_values,
-                                      subject_template_name=subject, plain_body_template_name=email_template_name )
+                                      subject=subject, plain_body_template_name=email_template_name )
 
-                    #user.save( )
+                    user.save( )
                     content = { 'detail': 'Password reset' }
                     return Response( content, status=status.HTTP_200_OK )
 

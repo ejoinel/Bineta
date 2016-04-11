@@ -84,15 +84,6 @@ TEMPLATES = [
 
 CSRF_FAILURE_VIEW = 'Bineta.views.csrf_failure'
 
-REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
-    ),
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
-    )
-}
-
 # Application definition
 
 DJANGO_APPS = (

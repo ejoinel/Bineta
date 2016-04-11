@@ -22,11 +22,9 @@ def remove_accents_spaces(self, ligne):
 
 
 
-def send_email(to_email, from_email, context, subject_template_name,
+def send_email(to_email, from_email, context, subject,
                plain_body_template_name=None, html_body_template_name=None):
     assert plain_body_template_name or html_body_template_name
-    subject = loader.render_to_string(subject_template_name, context)
-    subject = ''.join(subject.splitlines())
 
     if plain_body_template_name:
         plain_body = loader.render_to_string(plain_body_template_name, context)

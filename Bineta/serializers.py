@@ -4,12 +4,7 @@ from Bineta.models import User
 class UserSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = User
-
-
-
-class UserSerializer(serializers.HyperlinkedModelSerializer):
-    class Meta:
-        model = User
+    fiels = [ "email" ]
 
 
 
