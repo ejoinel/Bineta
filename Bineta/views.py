@@ -23,6 +23,7 @@ from django.views.generic import ListView
 from knox.auth import TokenAuthentication
 from rest_framework import status
 from rest_framework import viewsets
+from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -46,23 +47,67 @@ MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
 
 class UserViewSet(viewsets.ModelViewSet):
 
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
     def list(self, request):
-        queryset = User.objects.all()
+        user = request.user
+        if user.is_staff:
+            queryset = User.objects.all()
+        else:
+            queryset = [ user ]
         serializer = UserSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk=None):
-        queryset = User.objects.all()
-        user = get_object_or_404(queryset, pk=pk)
+        user = request.user
+        if user.is_staff:
+            user = get_object_or_404(User, pk=pk)
+        else:
+            user = get_object_or_404(User, pk=pk)
+
+            if user.id != pk:
+                return Response( status=status.HTTP_401_UNAUTHORIZED )
+
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+    def create(self, request):
+        pass
+
+    def update(self, request, pk=None):
+        pass
+
+    def partial_update(self, request, pk=None):
+        pass
+
+
+    @detail_route(methods=['post'])
+    def set_password(self, request, pk=None):
+        user = self.get_object()
+        serializer = PasswordResetSerializer(data=request.data)
+        if serializer.is_valid():
+            user.set_password(serializer.data['password'])
+            user.save()
+            return Response({'status': 'password set'})
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    @list_route()
+    def recent_users(self, request):
+        recent_users = User.objects.all().order('-last_login')
+
+        page = self.paginate_queryset(recent_users)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(recent_users, many=True)
+        return Response(serializer.data)
 
 
 class PasswordReset(APIView):
@@ -119,7 +164,6 @@ def get_logged_user_from_request( request ):
             return users
     else:
         return None
-    return None
 
 
 def search_exam( request ):
@@ -153,9 +197,9 @@ def logout( request ):
 class ExamListView( ListView ):
 
     model = models.Exam
-    template_name = 'exam_list.html'  # optional (the default is app_name/modelNameInLowerCase_list.html; which will look into your templates folder for that path and file)
-    context_object_name = "vos_exam"    #default is object_list as well as model's_verbose_name_list and/or model's_verbose_name_plural_list, if defined in the model's inner Meta class
-    paginate_by = 2  #and that's it !!
+    template_name = 'exam_list.html'
+    context_object_name = "vos_exam"
+    paginate_by = 2
 
     def get_queryset(self):
         return Exam.objects.order_by('-creation_date')[:3]
@@ -172,7 +216,6 @@ class ExamListView( ListView ):
             vo_exam.display_title += " - {}".format( vo_exam.matter.name)
             display_type_exam = "" if vo_exam.mock_exam else ""
             vo_exam.diplay_info = "{}({}) - {}".format( vo_exam.school.name, vo_exam.year_exam, display_type_exam )
-            vo_image
 
         paginator = Paginator(vos_exam, self.paginate_by)
 
