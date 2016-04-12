@@ -7,7 +7,6 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from Bineta import settings
 from rest_framework import routers
-from rest_framework_nested import routers
 from Bineta.views import login, home, register, createexam, reset_password, ExamListView, search_exam, UserViewSet, PasswordReset
 
 router = routers.SimpleRouter()
