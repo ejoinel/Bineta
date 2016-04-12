@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from Bineta.models import User, School
 
-class SchoolSerializer(serializers.HyperlinkedModelSerializer):
+class SchoolSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = School
@@ -9,14 +9,15 @@ class SchoolSerializer(serializers.HyperlinkedModelSerializer):
 
 
 
-class UserSerializer( serializers.HyperlinkedModelSerializer ):
+class UserSerializer( serializers.ModelSerializer ):
 
-    school_name = SchoolSerializer(source='school')
+    school = SchoolSerializer()
 
     class Meta:
         model = User
         fields = [ "email", "last_login", "sex", "birth_date", "date_joined", "nickname", "first_name",
-                   "last_name", "school_name" ]
+                   "last_name", "school" ]
+        depth = 1
 
 
 
