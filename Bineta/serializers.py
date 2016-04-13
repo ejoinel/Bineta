@@ -21,6 +21,16 @@ class UserSerializer( serializers.ModelSerializer ):
 
 
 
-class PasswordResetSerializer( serializers.HyperlinkedModelSerializer ):
+class UserRegisterSerializer( serializers.ModelSerializer ):
+
+    school = SchoolSerializer( required=False )
+
+    class Meta:
+        model = User
+        fields = [ "email", "sex", "birth_date", "nickname", "first_name", "last_name", "school", "password" ]
+
+
+
+class PasswordResetSerializer( serializers.Serializer ):
     email = serializers.EmailField(max_length=30)
 

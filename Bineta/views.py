@@ -27,8 +27,7 @@ from rest_framework.decorators import detail_route, list_route
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import api_view
-from rest_framework.decorators import authentication_classes, permission_classes
+from rest_framework.decorators import authentication_classes, permission_classes, api_view
 
 import FORM_PROPERTIES
 import models
@@ -36,7 +35,7 @@ import settings
 import utils
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
 from Bineta.models import User, DocumentFile, Exam
-from Bineta.serializers import UserSerializer, PasswordResetSerializer
+from Bineta.serializers import UserSerializer, PasswordResetSerializer, UserRegisterSerializer
 from Bineta.settings import DEFAULT_FROM_EMAIL
 
 MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
@@ -44,6 +43,26 @@ MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
                  message_constants.SUCCESS: 'success',
                  message_constants.WARNING: 'warning',
                  message_constants.ERROR: 'danger', }
+
+
+
+class CreateUser( APIView ):
+
+    permission_classes = (AllowAny,)
+    serializer_class = UserRegisterSerializer
+
+    def post( self, request, format=None ):
+
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            User.objects.create_user(
+                serializer.init_data[ 'email' ],
+                serializer.init_data[ 'email' ],
+                serializer.init_data[ 'password' ]
+            )
+            return Response( serializer.data, status=status.HTTP_201_CREATED )
+        else:
+            return Response( serializer._errors, status=status.HTTP_400_BAD_REQUEST )
 
 
 
