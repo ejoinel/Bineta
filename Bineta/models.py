@@ -59,8 +59,6 @@ class School( models.Model ):
         db_table = 'School'
 
     name = models.CharField( max_length=100 )
-    is_monthly = models.BooleanField( 'monthly', default=True )
-    is_annual = models.BooleanField( 'annual', default=False )
 
     def __unicode__( self ):
         return self.name
