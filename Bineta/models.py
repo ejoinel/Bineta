@@ -59,6 +59,24 @@ class School( models.Model ):
         db_table = 'School'
 
     name = models.CharField( max_length=100 )
+    is_monthly = models.BooleanField( 'monthly', default=True )
+    is_annual = models.BooleanField( 'annual', default=False )
+
+    def __unicode__( self ):
+        return self.name
+
+
+
+class Subscription( models.Model ):
+    class Meta:
+        db_table = 'Subscription'
+
+    name = models.CharField( max_length=30 )
+    is_monthly = models.BooleanField( 'monthly', default=True )
+    is_annual = models.BooleanField( 'annual', default=False )
+    creation_date = models.DateTimeField( 'creation_date', default=timezone.now )
+    modification_date = models.DateTimeField( 'modification_date', default=timezone.now )
+    deletion_date = models.DateTimeField( 'deletion_date', default=None, blank=True, null=True )
 
     def __unicode__( self ):
         return self.name
@@ -104,7 +122,6 @@ class User( AbstractBaseUser, PermissionsMixin ):
     last_name = models.SlugField( max_length=30, default=None, null=True )
     school = models.ForeignKey( School, null=True, blank=True )
     sex = models.IntegerField( choices=PERSON_SEX_CHOICE, default=0 )
-    nb_points = models.IntegerField( default=0 )
     birth_date = models.DateField( default=None, blank=True, null=True )
     email = models.EmailField( 'email address', unique=True, max_length=254, db_index=True )
     date_joined = models.DateTimeField( 'date joined', default=timezone.now )
@@ -112,6 +129,7 @@ class User( AbstractBaseUser, PermissionsMixin ):
     is_admin = models.BooleanField( default=False )
     is_staff = models.BooleanField( default=False )
     receive_newsletter = models.BooleanField( 'receive newsletter', default=True )
+    subscriptions = models.ManyToManyField('Subscription', through='USerSubscription', related_name='subs')
 
     objects = UserManager( )
 
@@ -124,6 +142,24 @@ class User( AbstractBaseUser, PermissionsMixin ):
 
     def __unicode__( self ):
         return self.email
+
+
+
+class USerSubscription(models.Model):
+
+    class Meta:
+        db_table = 'USerSubscription'
+
+    creation_date = models.DateTimeField( 'creation_date', default=timezone.now )
+    begin_date = models.DateTimeField( 'begin_date', default=timezone.now )
+    end_date = models.DateTimeField( default=None, blank=True, null=True )
+    price = models.DecimalField(max_digits=6, decimal_places=2)
+    subscription = models.ForeignKey(Subscription, related_name='USerSubscription')
+    user = models.ForeignKey(User, related_name='USerSubscription')
+    type = models.CharField(max_length=100)
+
+    def __unicode__(self):
+        return "{} subscribes {} (price {})" % (self.user, self.subscription, self.price)
 
 
 

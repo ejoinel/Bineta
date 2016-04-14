@@ -17,6 +17,8 @@ class UserSerializer( serializers.ModelSerializer ):
         model = User
         fields = [ "email", "last_login", "sex", "birth_date", "date_joined", "nickname", "first_name",
                    "last_name", "school" ]
+        write_only_fields = ('password',)
+        read_only_fields = ('id',)
         depth = 1
 
 

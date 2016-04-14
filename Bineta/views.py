@@ -60,6 +60,8 @@ class CreateUser( APIView ):
                 serializer.init_data[ 'email' ],
                 serializer.init_data[ 'password' ]
             )
+            #user.set_password(validated_data['password'])
+            #user.save()
             return Response( serializer.data, status=status.HTTP_201_CREATED )
         else:
             return Response( serializer._errors, status=status.HTTP_400_BAD_REQUEST )
