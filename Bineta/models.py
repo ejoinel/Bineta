@@ -3,14 +3,13 @@
 # import DATABASE_CONF
 import os
 import utils
+from Bineta import settings
 from django.db import models
 from django.utils import timezone
 from django.template.defaultfilters import slugify
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 from rest_framework.authtoken.models import Token
-
-PERSON_SEX_CHOICE = ((0, 'Mr'), (1, 'Mme'), (2, 'Mlle'))
 
 FILE_TYPE = (
     (1, 'image'),
@@ -37,6 +36,32 @@ EXAM_YEAR_CHOICES = (
     (2012, '2012'),
     (2011, '2011'),
 )
+
+
+def upload_function( instance, filename ):
+
+    ext = filename.split( '.' )[-1]
+    filename = "{}_{}.{}".format( instance.document.id, instance.temp_id, ext )
+    document_path = "{}/{}/{}/{}/{}/{}"
+    doc_level = "{}{}".format( instance.document.level.name, instance.document.level.sub_category )
+
+    document_path = document_path.format( instance.document.document_type, instance.document.school.name, doc_level,
+                                          instance.document.matter.name, instance.document.year_exam,
+                                          instance.document.id )
+
+    parsed_document_path = "{}/{}".format( utils.remove_accents_spaces( document_path ), filename )
+
+    return os.path.join( '{}'.format( parsed_document_path ) )
+
+
+
+def upload_thumbnail( instance, filename ):
+
+    filename = "{}.{}".format( instance.email, "png" )
+    document_path = "ImagesProfile/{}".format( filename )
+
+    return os.path.join( document_path )
+
 
 
 class ClassLevel( models.Model ):
@@ -99,6 +124,26 @@ class UserManager( BaseUserManager ):
         user.save( )
         return user
 
+    def create_simple_user( self, email, password, last_name, first_name, gender='M', birth_date=None, school_id=None,
+                            **kwargs ):
+
+        image_profile = None
+
+        user = self.model( email=self.normalize_email( email ), is_active=True, is_admin=False,
+                           last_name=last_name, first_name=first_name, gender=gender, birth_date=birth_date,
+                           school_id=school_id, is_staff=False, **kwargs )
+
+        if user.gender == "M":
+            image_profile = utils.get_random_image( settings.MEDIA_IMAGE_PROFILE_MEN )
+        elif user.gender == "F":
+            image_profile = utils.get_random_image( settings.MEDIA_IMAGE_PROFILE_WOMEN )
+
+        if image_profile:
+            user.thumbnail = utils.copy_file_in_media( src_file=image_profile )
+        user.set_password( password )
+        user.save( )
+        return user
+
     def create_superuser( self, email, password, **kwargs ):
         user = self.model( email=email, is_staff=True, is_superuser=True, is_active=True, **kwargs )
         user.set_password( password )
@@ -110,6 +155,15 @@ class UserManager( BaseUserManager ):
 class User( AbstractBaseUser, PermissionsMixin ):
     USERNAME_FIELD = 'email'
 
+    GENDER_UNKNOWN = 'U'
+    GENDER_MALE = 'M'
+    GENDER_FEMALE = 'F'
+    GENDER_CHOICES = (
+        (GENDER_UNKNOWN, _('unknown')),
+        (GENDER_MALE, _('male')),
+        (GENDER_FEMALE, _('female')),
+    )
+
     class Meta:
         app_label = 'Bineta'
         db_table = "User"
@@ -118,8 +172,8 @@ class User( AbstractBaseUser, PermissionsMixin ):
     nickname = models.SlugField( max_length=20, null=True, blank=True )
     first_name = models.SlugField( max_length=30, default=None, null=True )
     last_name = models.SlugField( max_length=30, default=None, null=True )
-    school = models.ForeignKey( School, null=True, blank=True )
-    sex = models.IntegerField( choices=PERSON_SEX_CHOICE, default=0 )
+    school = models.ForeignKey( School, null=True, blank=True, default=None )
+    gender = models.CharField(_('gender'), max_length=1, choices=GENDER_CHOICES, default=GENDER_UNKNOWN)
     birth_date = models.DateField( default=None, blank=True, null=True )
     email = models.EmailField( 'email address', unique=True, max_length=254, db_index=True )
     date_joined = models.DateTimeField( 'date joined', default=timezone.now )
@@ -127,12 +181,13 @@ class User( AbstractBaseUser, PermissionsMixin ):
     is_admin = models.BooleanField( default=False )
     is_staff = models.BooleanField( default=False )
     receive_newsletter = models.BooleanField( 'receive newsletter', default=True )
-    subscriptions = models.ManyToManyField('Subscription', through='USerSubscription', related_name='subs')
+    thumbnail = models.ImageField( upload_to=upload_thumbnail, null=True, blank=True )
+    subscriptions = models.ManyToManyField( 'Subscription', through='USerSubscription', related_name='subs' )
 
-    objects = UserManager( )
+    objects = UserManager()
 
     def get_full_name( self ):
-        full_name = '%s %s' % (self.first_name, self.last_name)
+        full_name = '%s %s' % ( self.first_name, self.last_name )
         return full_name.strip( )
 
     def get_short_name( self ):
@@ -143,7 +198,7 @@ class User( AbstractBaseUser, PermissionsMixin ):
 
 
 
-class USerSubscription(models.Model):
+class USerSubscription( models.Model ):
 
     class Meta:
         db_table = 'USerSubscription'
@@ -151,13 +206,13 @@ class USerSubscription(models.Model):
     creation_date = models.DateTimeField( 'creation_date', default=timezone.now )
     begin_date = models.DateTimeField( 'begin_date', default=timezone.now )
     end_date = models.DateTimeField( default=None, blank=True, null=True )
-    price = models.DecimalField(max_digits=6, decimal_places=2)
-    subscription = models.ForeignKey(Subscription, related_name='USerSubscription')
-    user = models.ForeignKey(User, related_name='USerSubscription')
+    price = models.DecimalField( max_digits=6, decimal_places=2 )
+    subscription = models.ForeignKey( Subscription, related_name='USerSubscription' )
+    user = models.ForeignKey( User, related_name='USerSubscription' )
     type = models.CharField(max_length=100)
 
     def __unicode__(self):
-        return "{} subscribes {} (price {})" % (self.user, self.subscription, self.price)
+        return "{} subscribes {} (price {})" % ( self.user, self.subscription, self.price )
 
 
 
@@ -179,23 +234,6 @@ class Document( models.Model ):
 
     def __unicode__( self ):
         return self.name + " (" + str( self.status ) + ") " + self.school.name
-
-
-
-def upload_function( instance, filename ):
-
-    ext = filename.split( '.' )[-1]
-    filename = "{}_{}.{}".format( instance.document.id, instance.temp_id, ext )
-    document_path = "{}/{}/{}/{}/{}/{}"
-    doc_level = "{}{}".format( instance.document.level.name, instance.document.level.sub_category )
-
-    document_path = document_path.format( instance.document.document_type, instance.document.school.name, doc_level,
-                                          instance.document.matter.name, instance.document.year_exam,
-                                          instance.document.id )
-
-    parsed_document_path = "{}/{}".format( utils.remove_accents_spaces( document_path ), filename )
-
-    return os.path.join( '{}'.format( parsed_document_path ) )
 
 
 
@@ -284,3 +322,4 @@ class Comment( models.Model ):
 
     def __unicode__( self ):
         return "{} {} {} {}".format( self.user.email, self.document.name, self.comment, self.comment_date )
+

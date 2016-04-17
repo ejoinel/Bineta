@@ -98,7 +98,7 @@ class UserForm(forms.ModelForm):
     helper = FormHelper()
     helper.form_id = 'register-form'
     helper.form_show_labels = False
-    helper.layout = Layout(PrependedText('sex', '', ''),
+    helper.layout = Layout(PrependedText('gender', '', ''),
                            PrependedText('email', '<span class="fa fa-user fa-lg"></span>', placeholder="Email"),
                            PrependedText('password1', '<span class="fa fa-lock fa-lg fa-lg"></span>', placeholder="Mot de passe"),
                            PrependedText('password2', '<span class="fa fa-lock fa-lg fa-lg"></span>', placeholder="Confirmer"),
@@ -110,7 +110,7 @@ class UserForm(forms.ModelForm):
 
     class Meta:
         model = User
-        fields = ('sex', 'email', 'password1', 'password2', 'last_name', 'first_name', 'birth_date', 'school')
+        fields = ('gender', 'email', 'password1', 'password2', 'last_name', 'first_name', 'birth_date', 'school')
 
     def __init__(self, *args, **kwargs):
         super(UserForm, self).__init__(*args, **kwargs)

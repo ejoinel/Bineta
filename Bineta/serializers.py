@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Bineta.models import User, School, Subscription, USerSubscription
+from Bineta.models import User, School, Subscription
 
 class SchoolSerializer(serializers.ModelSerializer):
 
@@ -19,24 +19,28 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class UserSerializer( serializers.ModelSerializer ):
 
     subscriptions = SubscriptionSerializer( many=True, read_only=True )
+    thumbnail_url = serializers.SerializerMethodField( 'get_thumbnail_url' )
+
+    def get_thumbnail_url(self, obj):
+        return self.context[ 'request' ].build_absolute_uri( self.thumbnail_url )
 
     class Meta:
         model = User
-        fields = [ "email", "last_login", "sex", "birth_date", "date_joined", "nickname", "first_name",
-                   "last_name", "school", "subscriptions" ]
-        write_only_fields = ('password',)
-        read_only_fields = ('id',)
+        fields = [ "email", "last_login", "gender", "birth_date", "date_joined", "nickname", "first_name",
+                   "last_name", "school", "subscriptions", "thumbnail_url" ]
+        #write_only_fields = ('password',)
+        read_only_fields = [ 'thumbnail_url', 'password' ]
         depth = 2
 
 
 
 class UserRegisterSerializer( serializers.ModelSerializer ):
 
-    school = SchoolSerializer( required=False )
+    #school = SchoolSerializer( required=False )
 
     class Meta:
         model = User
-        fields = [ "email", "sex", "birth_date", "nickname", "first_name", "last_name", "school", "password" ]
+        fields = [ "email", "gender", "birth_date", "nickname", "first_name", "last_name", "school", "password" ]
 
 
 

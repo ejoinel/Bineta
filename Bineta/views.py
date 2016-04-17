@@ -23,11 +23,11 @@ from django.views.generic import ListView
 from knox.auth import TokenAuthentication
 from rest_framework import status
 from rest_framework import viewsets
-from rest_framework.decorators import detail_route, list_route
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.decorators import detail_route, list_route, parser_classes
+from rest_framework.parsers import FormParser, MultiPartParser
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAdminUser
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.decorators import authentication_classes, permission_classes, api_view
 
 import FORM_PROPERTIES
 import models
@@ -55,26 +55,32 @@ class CreateUser( APIView ):
 
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
-            User.objects.create_user(
-                serializer.init_data[ 'email' ],
-                serializer.init_data[ 'email' ],
-                serializer.init_data[ 'password' ]
-            )
-            #user.set_password(validated_data['password'])
-            #user.save()
-            return Response( serializer.data, status=status.HTTP_201_CREATED )
+
+            user = User.objects.create_simple_user( email=serializer.data[ 'email' ],
+                                                    password=serializer.data[ 'password' ],
+                                                    last_name=serializer.data[ 'last_name' ],
+                                                    first_name=serializer.data[ 'first_name' ],
+                                                    gender=serializer.data[ 'gender' ],
+                                                    birth_date=serializer.data[ 'birth_date' ],
+                                                    school_id=serializer.data[ 'school' ] )
+
+            if not user:
+                return Response( status=status.HTTP_500_INTERNAL_SERVER_ERROR )
+
+            return Response( status=status.HTTP_201_CREATED )
         else:
-            return Response( serializer._errors, status=status.HTTP_400_BAD_REQUEST )
+            return Response( serializer.errors, status=status.HTTP_400_BAD_REQUEST )
 
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet( viewsets.ModelViewSet):
 
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
+    authentication_classes = ( TokenAuthentication, )
+    permission_classes = [ IsAuthenticated ]
 
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
 
     def list(self, request):
         user = request.user
@@ -101,6 +107,23 @@ class UserViewSet(viewsets.ModelViewSet):
     def create(self, request):
         pass
 
+
+    @detail_route(methods=['POST'], permission_classes=[ IsAdminUser ])
+    @parser_classes((FormParser, MultiPartParser,))
+    def image(self, request, *args, **kwargs):
+        if 'upload' in request.data:
+            user_profile = self.get_object()
+            user_profile.image.delete()
+
+            upload = request.data['upload']
+
+            user_profile.image.save(upload.name, upload)
+
+            return Response(status=status.HTTP_201_CREATED, headers={'Location': user_profile.thumbnail.url})
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+
+
     def update(self, request, pk=None):
         pass
 
@@ -121,16 +144,17 @@ class UserViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @list_route()
-    def recent_users(self, request):
-        recent_users = User.objects.all().order('-last_login')
+    def recent_users( self, request ):
+        recent_users = User.objects.all().order( '-last_login' )
 
-        page = self.paginate_queryset(recent_users)
+        page = self.paginate_queryset( recent_users )
         if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            serializer = self.get_serializer( page, many=True )
+            return self.get_paginated_response( serializer.data  )
 
-        serializer = self.get_serializer(recent_users, many=True)
-        return Response(serializer.data)
+        serializer = self.get_serializer( recent_users, many=True )
+        return Response( serializer.data )
+
 
 
 class PasswordReset(APIView):

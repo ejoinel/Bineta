@@ -29,7 +29,10 @@ LOCALE_PATHS = ('~/Projets/Perso/Bineta/Bineta/local',)
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-#WHOOSH_INDEX = os.path.join(BASE_DIR, 'whoosh/')
+MEDIA_IMAGE_PROFILE_MEN = os.path.join(MEDIA_ROOT, 'Icons', 'Men' )
+MEDIA_IMAGE_PROFILE_WOMEN = os.path.join(MEDIA_ROOT, 'Icons', 'Women' )
+MEDIA_IMAGES_PROFILE = os.path.join(MEDIA_ROOT, 'ImagesProfile' )
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/dev/howto/deployment/checklist/
