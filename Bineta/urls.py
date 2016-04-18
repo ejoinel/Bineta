@@ -8,10 +8,11 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from Bineta import settings
 from rest_framework import routers
 from Bineta.views import login, home, register, createexam, reset_password, ExamListView, search_exam,\
-    UserViewSet, PasswordReset, CreateUser
+    UserViewSet, PasswordReset, CreateUser, ExamViewSet
 
 router = routers.SimpleRouter()
 router.register(r'users', UserViewSet)
+router.register(r'exams', ExamViewSet)
 
 
 admin.autodiscover()
@@ -27,7 +28,6 @@ urlpatterns = [
     url(r'^register$', register),
     url(r'^createexam$', createexam),
     url(r'^exam_list$', ExamListView.as_view()),
-    #url(r'^exam_detail/(?P<pk>\d+)/', views.exam_detail, name='person_detail'),
     url(r'^account/reset_password', reset_password, name="reset_password"),
     url(r'^search$', search_exam),
     url(r'^docs/', include('rest_framework_docs.urls')),

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Bineta.models import User, School, Subscription
+from Bineta.models import User, School, Subscription, Exam
 
 class SchoolSerializer(serializers.ModelSerializer):
 
@@ -48,3 +48,8 @@ class PasswordResetSerializer( serializers.Serializer ):
     email = serializers.EmailField(max_length=30)
 
 
+class ExamSerializer( serializers.Serializer ):
+
+    class Meta:
+        model = Exam
+        fields = [ "email", "gender", "birth_date", "nickname", "first_name", "last_name", "school", "password" ]

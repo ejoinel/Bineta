@@ -35,7 +35,7 @@ import settings
 import utils
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
 from Bineta.models import User, DocumentFile, Exam
-from Bineta.serializers import UserSerializer, PasswordResetSerializer, UserRegisterSerializer
+from Bineta.serializers import UserSerializer, PasswordResetSerializer, UserRegisterSerializer, ExamSerializer
 from Bineta.settings import DEFAULT_FROM_EMAIL
 
 MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
@@ -73,6 +73,45 @@ class CreateUser( APIView ):
 
 
 
+class ExamViewSet( viewsets.ModelViewSet ):
+
+    authentication_classes = ( TokenAuthentication, )
+    permission_classes = [ IsAuthenticated ]
+
+    queryset = Exam.objects.all()
+    serializer_class = ExamSerializer
+
+    def list( self, request ):
+        user = request.user
+        if user.is_staff:
+            queryset = Exam.objects.all()
+        else:
+            queryset = Exam.objects.filter( status=2 )
+        serializer = ExamSerializer( queryset, many=True )
+        return Response( serializer.data )
+
+    def retrieve( self, request, pk=None ):
+        user = request.user
+        if user.is_staff:
+            exam = get_object_or_404( User, pk=pk )
+        else:
+            exam = get_object_or_404( User, pk=pk )
+
+            if exam.status != 2:
+                return Response( status=status.HTTP_401_UNAUTHORIZED )
+
+        serializer = UserSerializer( exam )
+        return Response( serializer.data )
+
+    @list_route()
+    @detail_route(methods=['POST'], permission_classes=[ IsAdminUser ])
+    def create_exam( self, request ):
+        user = request.user
+        serializer = UserSerializer( None )
+        return Response( serializer.data )
+
+
+
 class UserViewSet( viewsets.ModelViewSet):
 
     authentication_classes = ( TokenAuthentication, )
@@ -82,27 +121,27 @@ class UserViewSet( viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
-    def list(self, request):
+    def list( self, request ):
         user = request.user
         if user.is_staff:
             queryset = User.objects.all()
         else:
             queryset = [ user ]
-        serializer = UserSerializer(queryset, many=True)
-        return Response(serializer.data)
+        serializer = UserSerializer( queryset, many=True )
+        return Response( serializer.data )
 
-    def retrieve(self, request, pk=None):
+    def retrieve( self, request, pk=None ):
         user = request.user
         if user.is_staff:
-            user = get_object_or_404(User, pk=pk)
+            user = get_object_or_404( User, pk=pk )
         else:
-            user = get_object_or_404(User, pk=pk)
+            user = get_object_or_404( User, pk=pk )
 
             if user.id != pk:
                 return Response( status=status.HTTP_401_UNAUTHORIZED )
 
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+        serializer = UserSerializer( user )
+        return Response( serializer.data )
 
     def create(self, request):
         pass
