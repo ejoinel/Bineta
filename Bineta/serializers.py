@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from Bineta.models import User, School, Subscription
+from Bineta.models import User, School, Subscription, Exam, DocumentFile
 
 class SchoolSerializer(serializers.ModelSerializer):
 
@@ -47,4 +47,19 @@ class UserRegisterSerializer( serializers.ModelSerializer ):
 class PasswordResetSerializer( serializers.Serializer ):
     email = serializers.EmailField(max_length=30)
 
+
+class ExamSerializer( serializers.ModelSerializer ):
+
+    class Meta:
+        model = Exam
+        fields = [ "slug", "level", "school", "nb_views", "name", "matter", "creation_date" ]
+        read_only_fields = [ "slug", "creation_date", "name" ]
+
+
+
+class DocumentFileSerializer( serializers.ModelSerializer ):
+
+    class Meta:
+        model = DocumentFile
+        fields = ( 'url', 'image' )
 

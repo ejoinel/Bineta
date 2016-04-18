@@ -128,6 +128,11 @@ REST_KNOX = {
   'USER_SERIALIZER': 'knox.serializers.UserSerializer',
 }
 
+REST_FRAMEWORK = {
+    'DEFAULT_PARSER_CLASSES': ('rest_framework.parsers.JSONParser', 'rest_framework.parsers.FormParser',
+                               'rest_framework.parsers.MultiPartParser',),
+}
+
 PASSWORD_HASHERS = (
     'django.contrib.auth.hashers.BCryptSHA256PasswordHasher',
     'django.contrib.auth.hashers.BCryptPasswordHasher',

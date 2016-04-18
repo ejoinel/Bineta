@@ -7,11 +7,12 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 
 from Bineta import settings
 from rest_framework import routers
-from Bineta.views import login, home, register, createexam, reset_password, ExamListView, search_exam,\
-    UserViewSet, PasswordReset, CreateUser
+from Bineta.views import login, home, register, reset_password, search_exam,\
+    UserViewSet, PasswordReset, CreateUser, ExamViewSet, CreateExam, Exam_list
 
 router = routers.SimpleRouter()
 router.register(r'users', UserViewSet)
+#router.register(r'exams', ExamViewSet)
 
 
 admin.autodiscover()
@@ -19,15 +20,14 @@ admin.autodiscover()
 urlpatterns = [
     url( r'^api/v1/reset_password/', PasswordReset.as_view(), name="reset_password" ),
     url( r'^api/v1/register/', CreateUser.as_view(), name="register" ),
+    url( r'^api/v1/exams/', Exam_list, name="exams" ),
+    url( r'^api/v1/create_exam/', CreateExam.as_view(), name="create_exam" ),
     url(r'^$', home, name='home'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', home),
     url(r'^home', home),
     url(r'^login$', login),
     url(r'^register$', register),
-    url(r'^createexam$', createexam),
-    url(r'^exam_list$', ExamListView.as_view()),
-    #url(r'^exam_detail/(?P<pk>\d+)/', views.exam_detail, name='person_detail'),
     url(r'^account/reset_password', reset_password, name="reset_password"),
     url(r'^search$', search_exam),
     url(r'^docs/', include('rest_framework_docs.urls')),

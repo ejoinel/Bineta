@@ -118,6 +118,7 @@ class ClassTopic( models.Model ):
 
 
 class UserManager( BaseUserManager ):
+
     def create_user( self, email, password, **kwargs ):
         user = self.model( email=self.normalize_email( email ), is_active=True, **kwargs )
         user.set_password( password )
@@ -141,7 +142,7 @@ class UserManager( BaseUserManager ):
         if image_profile:
             user.thumbnail = utils.copy_file_in_media( src_file=image_profile )
         user.set_password( password )
-        user.save( )
+        user.save()
         return user
 
     def create_superuser( self, email, password, **kwargs ):
@@ -251,11 +252,25 @@ class DocumentFile( models.Model ):
 
 
 class Exam( Document ):
+
+    EXAM_TYPE_REAL = 'R'
+    EXAM_TYPE_MOCK = 'M'
+    EXAM_TYPE_COMMON = 'C'
+    EXAM_TYPES = ( ( EXAM_TYPE_REAL, _( 'real' ) ),
+                   ( EXAM_TYPE_MOCK, _( 'mock' ) ),
+                   ( EXAM_TYPE_COMMON, _( 'common' ) ), )
+
+    def create_exam( self, user_id, level_id, school_id, matter_id, year_exam, mock_exam, **kwargs ):
+
+        exam = self.model( user_id=user_id, level_id=level_id, school_id=school_id, matter_id=matter_id, year_exam=year_exam,
+                           mock_exam=mock_exam)
+        return exam
+
     class Meta:
         db_table = 'Exam'
 
     year_exam = models.IntegerField( choices=EXAM_YEAR_CHOICES, default='2016' )
-    mock_exam = models.IntegerField( choices=EXAM_TYPE, default=1 )
+    mock_exam = models.IntegerField( choices=EXAM_TYPES, default=EXAM_TYPE_REAL )
     document_type = "Exam"
 
     def __unicode__( self ):

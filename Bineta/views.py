@@ -35,7 +35,7 @@ import settings
 import utils
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
 from Bineta.models import User, DocumentFile, Exam
-from Bineta.serializers import UserSerializer, PasswordResetSerializer, UserRegisterSerializer
+from Bineta.serializers import UserSerializer, PasswordResetSerializer, UserRegisterSerializer, ExamSerializer
 from Bineta.settings import DEFAULT_FROM_EMAIL
 
 MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
@@ -51,7 +51,7 @@ class CreateUser( APIView ):
     permission_classes = (AllowAny,)
     serializer_class = UserRegisterSerializer
 
-    def post( self, request, format=None ):
+    def post( self, request ):
 
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
@@ -73,6 +73,68 @@ class CreateUser( APIView ):
 
 
 
+class CreateExam( APIView ):
+
+    authentication_classes = ( TokenAuthentication, )
+    permission_classes = [ IsAdminUser ]
+
+    serializer_class = ExamSerializer
+    parser_classes = (FormParser, MultiPartParser,)
+
+    def post( self, request ):
+        upload_files = request.FILES.get('files')
+        if not upload_files:
+            return Response(status=404)
+        serializer = UserSerializer( None )
+        return Response( serializer.data )
+
+
+
+class ExamViewSet( viewsets.ModelViewSet ):
+
+
+    authentication_classes = ( TokenAuthentication, )
+    permission_classes = [ IsAuthenticated ]
+    parser_classes = ( FormParser, MultiPartParser )
+
+    queryset = Exam.objects.all()
+    serializer_class = ExamSerializer
+
+    def list( self, request ):
+        user = request.user
+        if user.is_staff:
+            queryset = Exam.objects.all()
+        else:
+            queryset = Exam.objects.filter( status=2 )
+        serializer = ExamSerializer( queryset, many=True )
+        return Response( serializer.data )
+
+    def retrieve( self, request, pk=None ):
+        user = request.user
+        exam = get_object_or_404( User, pk=pk )
+
+        if not user.is_staff and exam.status != 2:
+            return Response( status=status.HTTP_401_UNAUTHORIZED )
+
+        serializer = UserSerializer( exam )
+        return Response( serializer.data )
+
+    def create( self, request ):
+        upload_files = request.FILES.get('files')
+        if not upload_files:
+            return Response(status=404)
+        serializer = UserSerializer( None )
+        return Response( serializer.data )
+
+
+
+Exam_list = ExamViewSet.as_view({
+    'get': 'list',
+    'post': 'create'
+})
+
+
+
 class UserViewSet( viewsets.ModelViewSet):
 
     authentication_classes = ( TokenAuthentication, )
@@ -82,27 +144,27 @@ class UserViewSet( viewsets.ModelViewSet):
     serializer_class = UserSerializer
 
 
-    def list(self, request):
+    def list( self, request ):
         user = request.user
         if user.is_staff:
             queryset = User.objects.all()
         else:
             queryset = [ user ]
-        serializer = UserSerializer(queryset, many=True)
-        return Response(serializer.data)
+        serializer = UserSerializer( queryset, many=True )
+        return Response( serializer.data )
 
-    def retrieve(self, request, pk=None):
+    def retrieve( self, request, pk=None ):
         user = request.user
         if user.is_staff:
-            user = get_object_or_404(User, pk=pk)
+            user = get_object_or_404( User, pk=pk )
         else:
-            user = get_object_or_404(User, pk=pk)
+            user = get_object_or_404( User, pk=pk )
 
             if user.id != pk:
                 return Response( status=status.HTTP_401_UNAUTHORIZED )
 
-        serializer = UserSerializer(user)
-        return Response(serializer.data)
+        serializer = UserSerializer( user )
+        return Response( serializer.data )
 
     def create(self, request):
         pass
@@ -133,7 +195,7 @@ class UserViewSet( viewsets.ModelViewSet):
 
     @detail_route(methods=['post'])
     def set_password(self, request, pk=None):
-        user = self.get_object()
+        user = get_object_or_404( User, pk=pk )
         serializer = PasswordResetSerializer(data=request.data)
         if serializer.is_valid():
             user.set_password(serializer.data['password'])
@@ -144,7 +206,8 @@ class UserViewSet( viewsets.ModelViewSet):
                             status=status.HTTP_400_BAD_REQUEST)
 
     @list_route()
-    def recent_users( self, request ):
+    @detail_route(methods=['GET'], permission_classes=[ IsAdminUser ])
+    def recent_users( self ):
         recent_users = User.objects.all().order( '-last_login' )
 
         page = self.paginate_queryset( recent_users )
@@ -161,7 +224,7 @@ class PasswordReset(APIView):
     permission_classes = (AllowAny,)
     serializer_class = PasswordResetSerializer
 
-    def post( self, request, format=None ):
+    def post( self, request ):
         serializer = self.serializer_class(data=request.data)
 
         if serializer.is_valid():
