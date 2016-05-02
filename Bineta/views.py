@@ -82,7 +82,7 @@ class CreateExam( APIView ):
     parser_classes = (FormParser, MultiPartParser,)
 
     def post( self, request ):
-        upload_files = request.FILES.get('files')
+        upload_files = request.FILES.get('files[]')
         if not upload_files:
             return Response(status=404)
         serializer = UserSerializer( None )
@@ -125,6 +125,22 @@ class ExamViewSet( viewsets.ModelViewSet ):
             return Response(status=404)
         serializer = UserSerializer( None )
         return Response( serializer.data )
+
+
+    @detail_route(methods=['POST'], permission_classes=[ IsAdminUser ])
+    @parser_classes((FormParser, MultiPartParser,))
+    def exam_image(self, request, pk):
+        if 'image' in request.data:
+            vo_document = get_object_or_404( Exam, pk=pk )
+            sended_image = request.FILES.get('image')
+            if not sended_image:
+                return Response(status=404)
+            vo_document.document_thumbnail = request.data['image']
+            vo_document.save()
+
+            return Response(status=status.HTTP_201_CREATED, data=ExamSerializer( vo_document ) )
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
 
@@ -278,7 +294,7 @@ def get_logged_user_from_request( request ):
 
 def search_exam( request ):
     vos_exam = []
-    if request.method == 'POST':
+    if request.method == 'GET':
         search_text = request.POST["search_text"]
         if len( search_text ) >= 2:
             search_array = search_text.split(' ')

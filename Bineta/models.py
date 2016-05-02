@@ -64,6 +64,15 @@ def upload_thumbnail( instance, filename ):
 
 
 
+def upload_document_thumbnail( instance, filename ):
+
+    filename = "{}.{}".format( instance.id, "png" )
+    document_path = "ImagesDocument/{}".format( filename )
+
+    return os.path.join( document_path )
+
+
+
 class ClassLevel( models.Model ):
     class Meta:
         db_table = 'ClassLevel'
@@ -232,6 +241,7 @@ class Document( models.Model ):
     status = models.IntegerField( choices=DOCUMENT_STATUS, default=1 )
     creation_date = models.DateTimeField( auto_now_add=True )
     deletion_date = models.DateTimeField( null=True, default=None )
+    document_thumbnail = models.ImageField( upload_to=upload_document_thumbnail, null=True, blank=True )
 
     def __unicode__( self ):
         return self.name + " (" + str( self.status ) + ") " + self.school.name
