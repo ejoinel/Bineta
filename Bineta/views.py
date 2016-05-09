@@ -35,7 +35,8 @@ import settings
 import utils
 from Bineta.forms import LoginForm, UserForm, CreateExamForm, AccountResetPassword
 from Bineta.models import User, DocumentFile, Exam
-from Bineta.serializers import UserSerializer, PasswordResetSerializer, UserRegisterSerializer, ExamSerializer
+from Bineta.serializers import UserSerializer, PasswordResetSerializer, UserRegisterSerializer, ExamSerializer,\
+    DocumentFileSerializer
 from Bineta.settings import DEFAULT_FROM_EMAIL
 
 MESSAGE_TAGS = { message_constants.DEBUG: 'debug',
@@ -95,7 +96,6 @@ class ExamViewSet( viewsets.ModelViewSet ):
 
     authentication_classes = ( TokenAuthentication, )
     permission_classes = [ IsAuthenticated ]
-    parser_classes = ( FormParser, MultiPartParser )
 
     queryset = Exam.objects.all()
     serializer_class = ExamSerializer
@@ -127,10 +127,11 @@ class ExamViewSet( viewsets.ModelViewSet ):
         return Response( serializer.data )
 
 
+
     @detail_route(methods=['POST'], permission_classes=[ IsAdminUser ])
     @parser_classes((FormParser, MultiPartParser,))
-    def exam_image(self, request, pk):
-        if 'image' in request.data:
+    def image( self, request, pk=None ):
+        if 'file' in request.data:
             vo_document = get_object_or_404( Exam, pk=pk )
             sended_image = request.FILES.get('image')
             if not sended_image:
@@ -148,6 +149,41 @@ Exam_list = ExamViewSet.as_view({
     'get': 'list',
     'post': 'create'
 })
+
+
+class DocumentfileSet( viewsets.ModelViewSet):
+
+    authentication_classes = ( TokenAuthentication, )
+    permission_classes = [ IsAuthenticated ]
+
+    queryset = DocumentFile.objects.all()
+    serializer_class = DocumentFileSerializer
+
+    def list( self, request ):
+        user = request.user
+        if user.is_staff:
+            queryset = Exam.objects.all()
+        else:
+            queryset = Exam.objects.filter( status=2 )
+        serializer = ExamSerializer( queryset, many=True )
+        return Response( serializer.data )
+
+    def retrieve( self, request, pk=None ):
+        user = request.user
+        exam = get_object_or_404( User, pk=pk )
+
+        if not user.is_staff and exam.status != 2:
+            return Response( status=status.HTTP_401_UNAUTHORIZED )
+
+        serializer = UserSerializer( exam )
+        return Response( serializer.data )
+
+    def create( self, request ):
+        upload_files = request.FILES.get('files')
+        if not upload_files:
+            return Response(status=404)
+        serializer = UserSerializer( None )
+        return Response( serializer.data )
 
 
 

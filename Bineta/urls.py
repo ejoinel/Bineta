@@ -12,7 +12,7 @@ from Bineta.views import login, home, register, reset_password, search_exam,\
 
 router = routers.SimpleRouter()
 router.register(r'users', UserViewSet)
-#router.register(r'exams', ExamViewSet)
+router.register(r'exams', ExamViewSet)
 
 
 admin.autodiscover()

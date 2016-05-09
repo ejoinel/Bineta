@@ -19,18 +19,18 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 class UserSerializer( serializers.ModelSerializer ):
 
     subscriptions = SubscriptionSerializer( many=True, read_only=True )
-    thumbnail_url = serializers.SerializerMethodField( 'get_thumbnail_url' )
-
-    def get_thumbnail_url(self, obj):
-        return self.context[ 'request' ].build_absolute_uri( self.thumbnail_url )
+    thumbnail_url = serializers.SerializerMethodField('get_image_url')
 
     class Meta:
         model = User
         fields = [ "email", "last_login", "gender", "birth_date", "date_joined", "nickname", "first_name",
                    "last_name", "school", "subscriptions", "thumbnail_url" ]
-        #write_only_fields = ('password',)
-        read_only_fields = [ 'thumbnail_url', 'password' ]
         depth = 2
+        #write_only_fields = ('password',)
+        #read_only_fields = [ "thumbnail" ]
+
+    def get_image_url(self, obj):
+            return obj.thumbnail.url if obj.thumbnail else None
 
 
 
@@ -61,5 +61,5 @@ class DocumentFileSerializer( serializers.ModelSerializer ):
 
     class Meta:
         model = DocumentFile
-        fields = ( 'url', 'image' )
+        fields = ( 'description', 'image', 'document' )
 
