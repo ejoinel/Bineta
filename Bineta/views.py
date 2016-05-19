@@ -51,7 +51,7 @@ class IsOwner(BasePermission):
     Custom permission to only allow owners of profile to edit it.
     """
     def has_object_permission(self, request, view, obj):
-        return (obj.user == request.user and request.method in ['POST'])
+        return obj.user == request.user and request.method in ['POST']
 
 
 
@@ -156,7 +156,6 @@ class ExamViewSet( viewsets.ModelViewSet ):
             return Response(status=404)
         serializer = UserSerializer( None )
         return Response( serializer.data )
-
 
 
 Exam_list = ExamViewSet.as_view({
