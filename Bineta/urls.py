@@ -8,7 +8,7 @@ from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from Bineta import settings
 from rest_framework import routers
 from Bineta.views import login, home, register, reset_password, search_exam,\
-    UserViewSet, PasswordReset, CreateUser, ExamViewSet, CreateExam, Exam_list
+    UserViewSet, PasswordReset, CreateUser, ExamViewSet, CreateExam, Exam_list, exam_add_photo
 
 router = routers.SimpleRouter()
 router.register(r'users', UserViewSet)
@@ -22,6 +22,7 @@ urlpatterns = [
     url( r'^api/v1/register/', CreateUser.as_view(), name="register" ),
     url( r'^api/v1/exams/', Exam_list, name="exams" ),
     url( r'^api/v1/create_exam/', CreateExam.as_view(), name="create_exam" ),
+    url( r'^api/v1/exam_add_photo/(?P<exam_id>\d+)/$', exam_add_photo.as_view(), name="exam_add_photo" ),
     url(r'^$', home, name='home'),
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', home),
