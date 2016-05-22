@@ -17,11 +17,6 @@ FILE_TYPE = (
     (3, 'video'),
 )
 
-EXAM_TYPE = (
-    (1, 'real'),
-    (2, 'mock'),
-)
-
 DOCUMENT_STATUS = (
     (1, 'new'),
     (2, 'cleared'),
@@ -143,8 +138,11 @@ class UserManager( BaseUserManager ):
                            last_name=last_name, first_name=first_name, gender=gender, birth_date=birth_date,
                            school_id=school_id, is_staff=False, **kwargs )
 
+        user.identifier = utils.get_user_identifier()
+
         if user.gender == "M":
             image_profile = utils.get_random_image( settings.MEDIA_IMAGE_PROFILE_MEN )
+
         elif user.gender == "F":
             image_profile = utils.get_random_image( settings.MEDIA_IMAGE_PROFILE_WOMEN )
 
@@ -180,12 +178,13 @@ class User( AbstractBaseUser, PermissionsMixin ):
 
     slug = models.SlugField( max_length=100 )
     nickname = models.SlugField( max_length=20, null=True, blank=True )
-    first_name = models.SlugField( max_length=30, default=None, null=True )
-    last_name = models.SlugField( max_length=30, default=None, null=True )
+    first_name = models.CharField( max_length=30, default=None, null=True )
+    last_name = models.CharField( max_length=30, default=None, null=True )
     school = models.ForeignKey( School, null=True, blank=True, default=None )
     gender = models.CharField(_('gender'), max_length=1, choices=GENDER_CHOICES, default=GENDER_UNKNOWN)
     birth_date = models.DateField( default=None, blank=True, null=True )
     email = models.EmailField( 'email address', unique=True, max_length=254, db_index=True )
+    identifier = models.CharField( max_length=8, default=None )
     date_joined = models.DateTimeField( 'date joined', default=timezone.now )
     is_active = models.BooleanField( 'active', default=True )
     is_admin = models.BooleanField( default=False )
@@ -241,7 +240,7 @@ class Document( models.Model ):
     status = models.IntegerField( choices=DOCUMENT_STATUS, default=1 )
     creation_date = models.DateTimeField( auto_now_add=True )
     deletion_date = models.DateTimeField( null=True, default=None )
-    document_thumbnail = models.ImageField( upload_to=upload_document_thumbnail, null=True, blank=True )
+    document_thumbnail = models.ImageField( upload_to=upload_document_thumbnail, default=None )
 
     def __unicode__( self ):
         return self.name + " (" + str( self.status ) + ") " + self.school.name
@@ -270,17 +269,17 @@ class Exam( Document ):
                    ( EXAM_TYPE_MOCK, _( 'mock' ) ),
                    ( EXAM_TYPE_COMMON, _( 'common' ) ), )
 
-    def create_exam( self, user_id, level_id, school_id, matter_id, year_exam, mock_exam, **kwargs ):
+    def create_exam( self, user_id, level_id, school_id, matter_id, year_exam, exam_type, **kwargs ):
 
-        exam = self.model( user_id=user_id, level_id=level_id, school_id=school_id, matter_id=matter_id, year_exam=year_exam,
-                           mock_exam=mock_exam)
+        exam = self.model( user_id=user_id, level_id=level_id, school_id=school_id, matter_id=matter_id,
+                           year_exam=year_exam, exam_type=exam_type )
         return exam
 
     class Meta:
         db_table = 'Exam'
 
     year_exam = models.IntegerField( choices=EXAM_YEAR_CHOICES, default='2016' )
-    mock_exam = models.IntegerField( choices=EXAM_TYPES, default=EXAM_TYPE_REAL )
+    exam_type = models.CharField( _('exam_type'), choices=EXAM_TYPES, max_length=1, default=EXAM_TYPE_REAL )
     document_type = "Exam"
 
     def __unicode__( self ):
@@ -290,7 +289,7 @@ class Exam( Document ):
         if not self.id:
             # Newly created object, so set slug
             slug_text = "{} {} {} {} {}".format( self.school.name, self.level.name,
-                                                 self.level.sub_category, self.year_exam, self.mock_exam )
+                                                 self.level.sub_category, self.year_exam, self.exam_type )
             self.slug = self.name = slugify( slug_text )
 
         super( Exam, self ).save( *args, **kwargs )

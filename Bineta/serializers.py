@@ -24,7 +24,7 @@ class UserSerializer( serializers.ModelSerializer ):
     class Meta:
         model = User
         fields = [ "email", "last_login", "gender", "birth_date", "date_joined", "nickname", "first_name",
-                   "last_name", "school", "subscriptions", "thumbnail_url" ]
+                   "last_name", "school", "subscriptions", "thumbnail_url", "identifier" ]
         depth = 2
         #write_only_fields = ('password',)
         #read_only_fields = [ "thumbnail" ]
@@ -48,12 +48,21 @@ class PasswordResetSerializer( serializers.Serializer ):
     email = serializers.EmailField(max_length=30)
 
 
+
 class ExamSerializer( serializers.ModelSerializer ):
 
     class Meta:
         model = Exam
         fields = [ "slug", "level", "school", "nb_views", "name", "matter", "creation_date" ]
         read_only_fields = [ "slug", "creation_date", "name" ]
+
+
+
+class ExamCreationSerializer( serializers.ModelSerializer ):
+
+    class Meta:
+        model = Exam
+        fields = [  "level", "school", "matter", "year_exam", "exam_type" ]
 
 
 

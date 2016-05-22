@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
+import os
 import random
 import string
+import uuid
 from shutil import copyfile
 
-import os
 from django.core.mail import EmailMultiAlternatives, EmailMessage
 from django.template import loader
 
@@ -72,3 +73,16 @@ def handle_uploaded_file(f):
     with open('some/file/name.txt', 'wb+') as destination:
         for chunk in f.chunks():
             destination.write(chunk)
+
+
+
+def get_user_identifier():
+
+    from models import User
+    exist = True
+    while exist:
+        ref_uuid = uuid.uuid1()
+        ref_uuid_str = str( ref_uuid ).replace( '-', '' )[ :8 ].upper()
+        exist = User.objects.filter( identifier=ref_uuid_str )
+        if not exist:
+            return ref_uuid_str
