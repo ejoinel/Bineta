@@ -111,6 +111,7 @@ THIRD_PARTY_APPS = (
     'knox',
     'rest_framework_docs',
     'djng',
+    'django_nose',
 )
 
 
@@ -121,6 +122,20 @@ LOCAL_APPS = (
 )
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+NOSE_ARGS = [
+   '--with-coverage',  # activate coverage report
+    '--with-doctest',  # activate doctest: find and run docstests
+    '--verbosity=2',   # verbose output
+    '--with-xunit',    # enable XUnit plugin
+    '--xunit-file=xunittest.xml',  # the XUnit report file
+    '--cover-xml',     # produle XML coverage info
+    '--cover-xml-file=coverage.xml',  # the coverage info file
+    # You may also specify the packages to be covered here
+    '--cover-package=Bineta'
+]
 
 REST_KNOX = {
   'SECURE_HASH_ALGORITHM': 'cryptography.hazmat.primitives.hashes.SHA512',
